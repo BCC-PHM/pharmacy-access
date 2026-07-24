@@ -1,0 +1,75 @@
+---
+title: "Birmingham Pharmacy Access"
+author: "David Ellis"
+format: html
+editor: source
+echo: false
+warning: false
+---
+
+```{r setup}
+library(readxl)
+library(dplyr)
+library(janitor)
+library(leaflet)
+library(htmltools)
+library(sf)
+library(BSol.mapR)
+```
+
+
+## Current Pharmacy Provision
+
+```{r load-pharm-data}
+
+pharm_data <- read.csv("../data/birmingham_geocoded.csv") %>%
+  clean_names() %>%
+  rename(
+    postcode = birmingham_post_code,
+    name = birmingham_organisation_name) %>%
+  select(
+    postcode, name, contains("opening_hours")
+  ) %>%
+  mutate(
+    popup_text = paste0(
+      "<b>", name, "</b><br><br>",
+      "<b>Monday</b>:", birmingham_pharmacy_opening_hours_monday, "<br>",
+      "<b>Tuesday</b>:", birmingham_pharmacy_opening_hours_tuesday, "<br>",
+      "<b>Wednesday</b>:", birmingham_pharmacy_opening_hours_wednesday, "<br>",
+      "<b>Thursday</b>:", birmingham_pharmacy_opening_hours_thursday, "<br>",
+      "<b>Friday</b>:", birmingham_pharmacy_opening_hours_friday, "<br>",
+      "<b>Saturday</b>:", birmingham_pharmacy_opening_hours_saturday, "<br>",
+      "<b>Sunday</b>:", birmingham_pharmacy_opening_hours_sunday
+    )
+  )
+
+postcodes <- read.csv("../data/West Midlands postcodes.csv") %>%
+  clean_names() %>%
+  select(
+    postcode, longitude, latitude
+  )
+
+```
+
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
+
+```{r map-pharm-locs}
+pharm_data_pcs <- pharm_data %>%
+  left_join(
+    postcodes,
+    by = join_by("postcode")
+  ) %>%
+  rename(lng = longitude, lat = latitude)
+
+#pharm_loc_shp <- st_as_sf(get_points_shape(pharm_data_pcs))
+
+leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>%
+  setView(lng = -1.876932, lat = 52.4777, zoom = 11) %>%
+  addCircleMarkers(data = pharm_data_pcs, radius = 5,
+                   stroke = FALSE, fillOpacity = 0.5, popup = ~popup_text)
+
+# tm_shape(pharm_loc_shp) +
+#   tm_basemap("CartoDB.Positron") +
+#   tm_dots() 
+```
