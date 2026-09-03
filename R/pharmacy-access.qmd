@@ -1,7 +1,9 @@
 ---
 title: "Birmingham Pharmacy Access"
 author: "David Ellis"
-format: html
+format: 
+  html:
+    embed-resources: true
 editor: source
 echo: false
 warning: false
@@ -15,6 +17,8 @@ library(leaflet)
 library(htmltools)
 library(sf)
 library(BSol.mapR)
+library(wmSpatial)
+source("functions.R")
 ```
 
 
@@ -28,7 +32,7 @@ pharm_data <- read.csv("../data/birmingham_geocoded.csv") %>%
     postcode = birmingham_post_code,
     name = birmingham_organisation_name) %>%
   select(
-    postcode, name, contains("opening_hours")
+    postcode, name, contains("opening_hours"), birmingham_contract_type
   ) %>%
   mutate(
     popup_text = paste0(
@@ -41,35 +45,84 @@ pharm_data <- read.csv("../data/birmingham_geocoded.csv") %>%
       "<b>Saturday</b>:", birmingham_pharmacy_opening_hours_saturday, "<br>",
       "<b>Sunday</b>:", birmingham_pharmacy_opening_hours_sunday
     )
+  )%>%
+  filter(
+    # Filter out distance prescribing pharmacies
+    birmingham_contract_type != "DAC"
   )
 
-postcodes <- read.csv("../data/West Midlands postcodes.csv") %>%
-  clean_names() %>%
-  select(
-    postcode, longitude, latitude
-  )
+#pharm_data_pcs <- 
 
 ```
+:::{.panel-tabset}
+
+## All Days
 
 There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
 
-```{r map-pharm-locs}
-pharm_data_pcs <- pharm_data %>%
-  left_join(
-    postcodes,
-    by = join_by("postcode")
-  ) %>%
-  rename(lng = longitude, lat = latitude)
+```{r map-pharm-locs-all-days}
 
-#pharm_loc_shp <- st_as_sf(get_points_shape(pharm_data_pcs))
+day = ""
 
-leaflet() %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  setView(lng = -1.876932, lat = 52.4777, zoom = 11) %>%
-  addCircleMarkers(data = pharm_data_pcs, radius = 5,
-                   stroke = FALSE, fillOpacity = 0.5, popup = ~popup_text)
+pharm_access_1km_sf <- get_lsoa_access_sf(
+  pharm_data, 
+  radius_km = 1, 
+  day_filter = day
+)
 
-# tm_shape(pharm_loc_shp) +
-#   tm_basemap("CartoDB.Positron") +
-#   tm_dots() 
+plot_access_map(
+    pharm_access_1km_sf,
+    NA,
+    "Estimated Population within<br>1km of a Pharmacy",
+    day_filter = day
+  )
+
 ```
+
+## Saturday
+
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
+
+```{r map-pharm-locs-sat}
+
+day = "Saturday"
+
+pharm_access_1km_sf <- get_lsoa_access_sf(
+  pharm_data, 
+  radius_km = 1, 
+  day_filter = day
+)
+
+plot_access_map(
+    pharm_access_1km_sf,
+    NA,
+    "Estimated Population within<br>1km of a Pharmacy",
+    day_filter = day
+  )
+
+```
+
+## Sunday
+
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
+
+```{r map-pharm-locs-sun}
+
+day = "Sunday"
+
+pharm_access_1km_sf <- get_lsoa_access_sf(
+  pharm_data, 
+  radius_km = 1, 
+  day_filter = day
+)
+
+plot_access_map(
+    pharm_access_1km_sf,
+    NA,
+    "Estimated Population within<br>1km of a Pharmacy",
+    day_filter = day
+  )
+
+```
+
+:::
