@@ -62,7 +62,7 @@ plot_access_map <- function(
   
   leaflet(pharm_access_sf) %>%
     addTiles() %>%
-    setView(lng = -1.876932, lat = 52.4777, zoom = 11) %>%
+    setView(lng = -1.876932, lat = 52.5, zoom = 11) %>%
     addPolygons(
       fillColor = ~ mypalette(pop_perc),
       fillOpacity = 0.8,
@@ -74,19 +74,17 @@ plot_access_map <- function(
         direction = "auto"
       )) %>%
     addLegend("topright", pal = mypalette, values = ~pop_perc,
-              title = "Estimated Population within<br>1km of a Pharmacy",
+              title = legend_title,
               labFormat = labelFormat(suffix  = "%"),
               opacity = 1
-    ) 
-  
-  #%>%
-  # addCircleMarkers(
-  #   data = day_filter(pharm_data_pcs, day_filter), 
-  #   radius = 5,
-  #   stroke = FALSE, 
-  #   fillOpacity = 0.5, 
-  #   popup = ~popup_text,
-  #   color = "yellow"
-  #     )
+    ) %>%
+   addCircleMarkers(
+     data = day_filter(pharm_data_pcs, day_filter), 
+     radius = 5,
+     stroke = FALSE, 
+     fillOpacity = 0.5, 
+     popup = ~popup_text,
+     color = "yellow"
+       )
   
 }

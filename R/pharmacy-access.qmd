@@ -7,6 +7,9 @@ format:
 editor: source
 echo: false
 warning: false
+theme:
+  light: flatly
+  dark: darkly
 ---
 
 ```{r setup}
@@ -19,6 +22,9 @@ library(sf)
 library(BSol.mapR)
 library(wmSpatial)
 source("functions.R")
+
+# 1 mile in km
+key_distance_km = 1.609344
 ```
 
 
@@ -51,7 +57,7 @@ pharm_data <- read.csv("../data/birmingham_geocoded.csv") %>%
     birmingham_contract_type != "DAC"
   )
 
-#pharm_data_pcs <- 
+pharm_data_pcs <- join_postcode_info(pharm_data)
 
 ```
 :::{.panel-tabset}
@@ -61,19 +67,21 @@ pharm_data <- read.csv("../data/birmingham_geocoded.csv") %>%
 There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
 
 ```{r map-pharm-locs-all-days}
+#| fig-width: 6
+#| fig-height: 5.5
 
 day = ""
 
 pharm_access_1km_sf <- get_lsoa_access_sf(
   pharm_data, 
-  radius_km = 1, 
+  radius_km = key_distance_km, 
   day_filter = day
 )
 
 plot_access_map(
     pharm_access_1km_sf,
-    NA,
-    "Estimated Population within<br>1km of a Pharmacy",
+    pharm_data_pcs,
+    "Estimated Population<br>within 1 mile of a<br>Pharmacy (All Days)",
     day_filter = day
   )
 
@@ -84,19 +92,21 @@ plot_access_map(
 There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
 
 ```{r map-pharm-locs-sat}
+#| fig-width: 6
+#| fig-height: 5.5
 
 day = "Saturday"
 
 pharm_access_1km_sf <- get_lsoa_access_sf(
   pharm_data, 
-  radius_km = 1, 
+  radius_km = key_distance_km, 
   day_filter = day
 )
 
 plot_access_map(
     pharm_access_1km_sf,
-    NA,
-    "Estimated Population within<br>1km of a Pharmacy",
+    pharm_data_pcs,
+    "Estimated Population<br>within 1 mile of a<br>Pharmacy (Saturday)",
     day_filter = day
   )
 
@@ -107,19 +117,21 @@ plot_access_map(
 There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
 
 ```{r map-pharm-locs-sun}
+#| fig-width: 6
+#| fig-height: 5.5
 
 day = "Sunday"
 
 pharm_access_1km_sf <- get_lsoa_access_sf(
   pharm_data, 
-  radius_km = 1, 
+  radius_km = key_distance_km, 
   day_filter = day
 )
 
 plot_access_map(
     pharm_access_1km_sf,
-    NA,
-    "Estimated Population within<br>1km of a Pharmacy",
+    pharm_data_pcs,
+    "Estimated Population<br>within 1 mile of a<br>Pharmacy (Sunday)",
     day_filter = day
   )
 
