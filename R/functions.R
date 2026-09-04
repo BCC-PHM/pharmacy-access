@@ -53,7 +53,7 @@ plot_access_map <- function(
   ) {
   
   mypalette <- colorNumeric(
-    palette = palette, domain = pharm_access_1km_sf$pop_perc,
+    palette = palette, domain = c(0, 100),
     na.color = "transparent"
   )
   
@@ -73,7 +73,7 @@ plot_access_map <- function(
         textsize = "13px",
         direction = "auto"
       )) %>%
-    addLegend("topright", pal = mypalette, values = ~pop_perc,
+    addLegend("topright", pal = mypalette, values = seq(0, 100, 1),
               title = legend_title,
               labFormat = labelFormat(suffix  = "%"),
               opacity = 1
@@ -87,4 +87,26 @@ plot_access_map <- function(
      color = "yellow"
        )
   
+}
+
+
+get_total_access_perc <- function(
+    access_sf
+) {
+  access_perc = access_sf %>% 
+    summarise(
+      pop_inside = sum(pop_inside),
+      total_pop = sum(lsoa_pop)
+    ) %>%
+    mutate(
+      total_access_perc = round(100 * pop_inside / total_pop,1)
+    ) %>%
+    pull(total_access_perc)
+}
+
+get_open_pharm_count <- function(
+    df,
+    day_filter = ""
+) {
+  nrow(day_filter(df, day_filter = day_filter))
 }

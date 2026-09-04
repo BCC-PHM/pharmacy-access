@@ -64,12 +64,7 @@ pharm_data_pcs <- join_postcode_info(pharm_data)
 
 ## All Days
 
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
-
 ```{r map-pharm-locs-all-days}
-#| fig-width: 6
-#| fig-height: 5.5
-
 day = ""
 
 pharm_access_1km_sf <- get_lsoa_access_sf(
@@ -78,7 +73,10 @@ pharm_access_1km_sf <- get_lsoa_access_sf(
   day_filter = day
 )
 
-plot_access_map(
+access_perc <- get_total_access_perc(pharm_access_1km_sf)
+open_count <- get_open_pharm_count(pharm_data, day_filter = day)
+
+m <- plot_access_map(
     pharm_access_1km_sf,
     pharm_data_pcs,
     "Estimated Population<br>within 1 mile of a<br>Pharmacy (All Days)",
@@ -86,15 +84,18 @@ plot_access_map(
   )
 
 ```
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham. An estimated `r access_perc`% of Birmingham residents live within 1 mile of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
-## Saturday
-
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
-
-```{r map-pharm-locs-sat}
+```{r}
 #| fig-width: 6
 #| fig-height: 5.5
 
+m
+```
+
+## Saturday
+
+```{r map-pharm-locs-sat}
 day = "Saturday"
 
 pharm_access_1km_sf <- get_lsoa_access_sf(
@@ -103,7 +104,10 @@ pharm_access_1km_sf <- get_lsoa_access_sf(
   day_filter = day
 )
 
-plot_access_map(
+access_perc <- get_total_access_perc(pharm_access_1km_sf)
+open_count <- get_open_pharm_count(pharm_data, day_filter = day)
+
+m <- plot_access_map(
     pharm_access_1km_sf,
     pharm_data_pcs,
     "Estimated Population<br>within 1 mile of a<br>Pharmacy (Saturday)",
@@ -112,13 +116,18 @@ plot_access_map(
 
 ```
 
-## Sunday
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r open_count` (`r round(100*open_count/nrow(pharm_data),1)`%) are open on Saturday. An estimated `r access_perc`% of Birmingham residents live within 1 mile of a pharmacy that is open on Saturdays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham.
-
-```{r map-pharm-locs-sun}
+```{r}
 #| fig-width: 6
 #| fig-height: 5.5
+
+m
+```
+
+## Sunday
+
+```{r map-pharm-locs-sun}
 
 day = "Sunday"
 
@@ -128,13 +137,25 @@ pharm_access_1km_sf <- get_lsoa_access_sf(
   day_filter = day
 )
 
-plot_access_map(
+access_perc <- get_total_access_perc(pharm_access_1km_sf)
+open_count <- get_open_pharm_count(pharm_data, day_filter = day)
+
+m <- plot_access_map(
     pharm_access_1km_sf,
     pharm_data_pcs,
     "Estimated Population<br>within 1 mile of a<br>Pharmacy (Sunday)",
     day_filter = day
   )
 
+```
+
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r open_count` (`r round(100*open_count/nrow(pharm_data),1)`%) are open on Sunday. An estimated `r access_perc`% of Birmingham residents live within 1 mile of a pharmacy that is open on Sundays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+
+```{r}
+#| fig-width: 6
+#| fig-height: 5.5
+
+m
 ```
 
 :::
