@@ -1,20 +1,20 @@
 
 day_filter <- function(
   df, 
-  day_filter = "" 
+  day = "" 
 ) {
-  if (day_filter == "Saturday") {
+  if (day == "Saturday") {
     df <- df %>%
       filter(
         df$birmingham_pharmacy_opening_hours_saturday != "CLOSED"
       )
   }
-  else if (day_filter == "Sunday") {
+  else if (day == "Sunday") {
     df <- df %>%
       filter(
         df$birmingham_pharmacy_opening_hours_sunday != "CLOSED"
       )
-  } else if (day_filter != "") {
+  } else if (day != "All Days") {
     stop("Unrecognised day filter.")
   }
   
@@ -23,14 +23,14 @@ day_filter <- function(
 
 
 get_lsoa_access_sf <- function(
-  lsoa_data,
+  postcode_df,
   radius_km,
-  day_filter = ""
+  day
 ) {
   
-  pharm_data <- day_filter(lsoa_data, day_filter)
-  
-  access_lsoa <- prop_in_radius(pharm_data, radius_km)
+  postcode_df <- day_filter(postcode_df, day)
+
+  access_lsoa <- prop_in_radius(postcode_df, radius_km)
   
   sf::st_as_sf(BSol.mapR::LSOA21) %>%
     left_join(
@@ -46,11 +46,12 @@ get_lsoa_access_sf <- function(
 
 plot_access_map <- function(
     pharm_access_sf,
-    pharm_data_pcs,
-    legend_title,
-    day_filter = "",
+    pharm_data,
+    day,
     palette = "Blues"
   ) {
+  
+  pharm_data_pcs <- join_postcode_info(pharm_data)
   
   mypalette <- colorNumeric(
     palette = palette, domain = c(0, 100),
@@ -59,6 +60,10 @@ plot_access_map <- function(
   
   perc_labels <- paste0(round(pharm_access_sf$pop_perc,1), "%") %>%
     lapply(htmltools::HTML)
+  
+  legend_title <- paste0(
+    "Estimated Population<br>within 1 mile of a<br>Pharmacy (",
+    day, ")")
   
   leaflet(pharm_access_sf) %>%
     addTiles() %>%
@@ -79,7 +84,7 @@ plot_access_map <- function(
               opacity = 1
     ) %>%
    addCircleMarkers(
-     data = day_filter(pharm_data_pcs, day_filter), 
+     data = day_filter(pharm_data_pcs, day), 
      radius = 5,
      stroke = FALSE, 
      fillOpacity = 0.5, 
@@ -106,7 +111,36 @@ get_total_access_perc <- function(
 
 get_open_pharm_count <- function(
     df,
-    day_filter = ""
+    day
 ) {
-  nrow(day_filter(df, day_filter = day_filter))
+  nrow(day_filter(df, day = day))
+}
+
+basic_access_analysis <- function(
+    pharm_data,
+    radius_km = key_distance_km, 
+    day = day
+) {
+  
+  pharm_access_sf <- get_lsoa_access_sf(
+    pharm_data, 
+    radius_km = key_distance_km, 
+    day = day
+  )
+  
+  access_perc <- get_total_access_perc(pharm_access_sf)
+  
+  open_count <- get_open_pharm_count(pharm_data, day = day)
+  
+  m <- plot_access_map(
+    pharm_access_sf,
+    pharm_data,
+    day = day
+  )
+  
+  list(
+    map = m,
+    access_perc = access_perc,
+    open_count = open_count
+  )
 }
