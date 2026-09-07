@@ -121,9 +121,10 @@ get_open_pharm_count <- function(
 
 basic_access_analysis <- function(
     pharm_data,
-    radius_km = key_distance_km, 
-    day = day,
-    radii_km_list = c(radius_km)
+    radius_km, 
+    day,
+    radii_km_list,
+    eth_data
 ) {
   
   pharm_access_sf <- get_lsoa_access_sf(
@@ -146,12 +147,24 @@ basic_access_analysis <- function(
   
   p <- plot_variable_dist_access(var_dist_df, day)
   
+  eth_access <- calc_eth_access(
+    pharm_access_sf,
+    eth_data
+  )
+  
+  eth_plot <- plot_eth_access(
+    eth_access, 
+    day
+    )
+  
   list(
     map = m,
     access_perc = access_perc,
     open_count = open_count,
     var_dist = var_dist_df,
-    var_dist_plot = p
+    var_dist_plot = p,
+    eth_access = eth_access,
+    eth_plot = eth_plot
   )
 }
 
@@ -212,8 +225,57 @@ plot_variable_dist_access <- function(
     labs(
       y = paste0("Estimated Population\nProportion (",day, ")"),
       x = "Distance from Pharmacy (miles)"
-    ) #+
-    # scale_x_discrete(
-    #   labels = scales::label_number(prefix = "<")
-    # ) 
+    )
+}
+
+calc_eth_access <- function(
+  access_props,
+  eth_data
+  ) {
+  access_props %>%
+    left_join(
+      eth_data,
+      by = join_by("LSOA21" == "lsoa21_code"),
+      relationship = "one-to-many"
+    ) %>%
+    group_by(ethnicity) %>%
+    summarise(
+      n = sum(bsol_registrants * pop_prop),
+      N = sum(bsol_registrants)
+    ) %>%
+    mutate(
+      p = n / N,
+      access_perc = round(100 * p, 1),
+      Z = qnorm(0.975),
+      ci_95_lower = round(100 * (p + Z^2/(2*N) - Z * sqrt((p*(1-p)/N) + Z^2/(4*N^2))) / (1 + Z^2/N),1),
+      ci_95_upper =  round(100 * (p + Z^2/(2*N) + Z * sqrt((p*(1-p)/N) + Z^2/(4*N^2))) / (1 + Z^2/N),1)
+    )
+}
+
+plot_eth_access <- function(
+    eth_data,
+    day
+) {
+  ggplot(
+    eth_data, 
+    aes(
+      y = ethnicity,
+      x = access_perc
+    )
+  ) + 
+    geom_col(fill = bcc_cols("purple")) +
+    theme_bcc() +
+    scale_x_continuous(
+      expand = c(0,0),
+      limits = c(0, 100),
+      labels = scales::label_number(suffix = "%")
+    ) + 
+    geom_errorbar(
+      aes(xmin = ci_95_lower, xmax = ci_95_upper),
+      width = 0.5
+      ) +
+    labs(
+      x = paste0("Estimated Population Proportion within\n1 mile of a Pharmacy (",day, ")"),
+      y = ""
+    )
 }

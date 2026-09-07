@@ -9,6 +9,7 @@
 # Exclude the following directories 
 /data/
 /output/
+*config.R
 
 # Exclude data file types
 *.xls
