@@ -21,10 +21,14 @@ library(htmltools)
 library(sf)
 library(BSol.mapR)
 library(wmSpatial)
+library(plotly)
 source("functions.R")
 
 # 1 mile in km
 key_distance_km = 1.609344
+
+# Variable access radius array
+radii_list <- 1.609344 * c(0.25, 0.5, 1, 2) 
 ```
 
 
@@ -66,11 +70,12 @@ pharm_data <- read.csv("../data/birmingham_geocoded.csv") %>%
 alldays_access <- basic_access_analysis(
     pharm_data,
     radius_km = key_distance_km,
-    day = "All Days"
+    day = "All Days",
+    radii_km_list = radii_list
   )
 
 ```
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham. An estimated `r alldays_access$access_perc`% of Birmingham residents live within 1 mile of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham. An estimated `r alldays_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6
@@ -79,24 +84,43 @@ There are currently `r nrow(pharm_data)` pharmacies in Birmingham. An estimated 
 alldays_access$m
 ```
 
+An estimated `r round(alldays_access$var_dist$access_perc[1], 1)`% and `r round(alldays_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(alldays_access$var_dist$radii_miles[1], 1)` miles and `r round(alldays_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open at least one day of the week. 
+
+```{r check_name}
+#| fig-width: 6
+#| fig-height: 3
+
+ggplotly(alldays_access$var_dist_plot)
+```
+
 ## Saturday
 
 ```{r map-pharm-locs-sat}
 saturday_access <- basic_access_analysis(
     pharm_data,
     radius_km = key_distance_km,
-    day = "Saturday"
+    day = "Saturday",
+    radii_km_list = radii_list
   )
 
 ```
 
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r saturday_access$open_count` (`r round(100*saturday_access$open_count/nrow(pharm_data),1)`%) are open on Saturday. An estimated `r saturday_access$access_perc`% of Birmingham residents live within 1 mile of a pharmacy that is open on Saturdays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r saturday_access$open_count` (`r round(100*saturday_access$open_count/nrow(pharm_data),1)`%) are open on Saturday. An estimated `r saturday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open on Saturdays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6
 #| fig-height: 5.5
 
 saturday_access$m
+```
+
+An estimated `r round(saturday_access$var_dist$access_perc[1], 1)`% and `r round(saturday_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(saturday_access$var_dist$radii_miles[1], 1)` miles and `r round(saturday_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open on Saturdays. 
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+
+ggplotly(saturday_access$var_dist_plot)
 ```
 
 ## Sunday
@@ -106,12 +130,14 @@ saturday_access$m
 sunday_access <- basic_access_analysis(
     pharm_data,
     radius_km = key_distance_km,
-    day = "Sunday"
+    day = "Sunday",
+    radii_km_list = radii_list
   )
+
 
 ```
 
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r sunday_access$open_count` (`r round(100*sunday_access$open_count/nrow(pharm_data),1)`%) are open on Sunday. An estimated `r sunday_access$access_perc`% of Birmingham residents live within 1 mile of a pharmacy that is open on Sundays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r sunday_access$open_count` (`r round(100*sunday_access$open_count/nrow(pharm_data),1)`%) are open on Sunday. An estimated `r sunday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open on Sundays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6
@@ -119,5 +145,16 @@ There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r 
 
 sunday_access$map
 ```
+
+
+An estimated `r round(sunday_access$var_dist$access_perc[1], 1)`% and `r round(sunday_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(sunday_access$var_dist$radii_miles[1], 1)` miles and `r round(sunday_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open on Sundays. 
+
+```{r}
+#| fig-width: 6
+#| fig-height: 3
+
+ggplotly(sunday_access$var_dist_plot)
+```
+
 
 :::

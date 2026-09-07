@@ -1,3 +1,7 @@
+library(ggplot2)
+library(dplyr)
+library(leaflet)
+library(bcctheme)
 
 day_filter <- function(
   df, 
@@ -48,7 +52,7 @@ plot_access_map <- function(
     pharm_access_sf,
     pharm_data,
     day,
-    palette = "Blues"
+    palette = bcc_pal(palette = "purple", reverse = TRUE)(10)
   ) {
   
   pharm_data_pcs <- join_postcode_info(pharm_data)
@@ -87,13 +91,12 @@ plot_access_map <- function(
      data = day_filter(pharm_data_pcs, day), 
      radius = 5,
      stroke = FALSE, 
-     fillOpacity = 0.5, 
+     fillOpacity = 0.6, 
      popup = ~popup_text,
-     color = "yellow"
+     color = bcc_cols("yellow")[[1]]
        )
   
 }
-
 
 get_total_access_perc <- function(
     access_sf
@@ -119,7 +122,8 @@ get_open_pharm_count <- function(
 basic_access_analysis <- function(
     pharm_data,
     radius_km = key_distance_km, 
-    day = day
+    day = day,
+    radii_km_list = c(radius_km)
 ) {
   
   pharm_access_sf <- get_lsoa_access_sf(
@@ -138,9 +142,78 @@ basic_access_analysis <- function(
     day = day
   )
   
+  var_dist_df <- variable_distance_access(pharm_data, day, radii_km_list)
+  
+  p <- plot_variable_dist_access(var_dist_df, day)
+  
   list(
     map = m,
     access_perc = access_perc,
-    open_count = open_count
+    open_count = open_count,
+    var_dist = var_dist_df,
+    var_dist_plot = p
   )
+}
+
+variable_distance_access <- function(
+    pharm_data,
+    day,
+    radii_km_list
+  ) {
+    
+  access_percs <- c()
+  
+  for (radius_i in radii_km_list) {
+    sf_i <- get_lsoa_access_sf(
+      pharm_data,
+      radius_i,
+      day
+    )
+    
+    access_percs <- c(access_percs, get_total_access_perc(sf_i))
+  }
+  
+  data <- data.frame(
+    radii_km = radii_km_list,
+    access_perc = access_percs 
+  ) %>%
+    mutate(
+      radii_miles = radii_km / 1.609344
+    ) %>%
+    select(
+      radii_km, radii_miles, access_perc
+    )
+  
+  return(data)
+}
+
+plot_variable_dist_access <- function(
+    access_perc_array,
+    day
+) {
+  ggplot(
+    access_perc_array %>%
+      mutate(
+        radii_miles = as.factor(radii_miles),
+        radii_miles = paste0("<", radii_miles)
+      ), 
+    aes(
+      x = radii_miles,
+      y = access_perc
+    )
+    ) + 
+    geom_col(fill = bcc_cols("purple")) +
+    theme_bcc() +
+    scale_y_continuous(
+      expand = c(0,0),
+      limits = c(0, 100),
+      labels = scales::label_number(suffix = "%")
+      ) + 
+    labs(
+      y = paste0("Estimated Population\nProportion (",day, ")"),
+      x = "Distance from Pharmacy (miles)"
+    ) #+
+    # scale_x_discrete(
+    #   labels = scales::label_number(prefix = "<")
+    # ) 
 }
