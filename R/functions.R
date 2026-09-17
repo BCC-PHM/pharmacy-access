@@ -216,7 +216,7 @@ plot_variable_dist_access <- function(
     )
     ) + 
     geom_col(fill = bcc_cols("purple")) +
-    theme_bcc() +
+    theme_bcc(base_size = 12)  +
     scale_y_continuous(
       expand = c(0,0),
       limits = c(0, 100),
@@ -264,7 +264,7 @@ plot_eth_access <- function(
     )
   ) + 
     geom_col(fill = bcc_cols("purple")) +
-    theme_bcc() +
+    theme_bcc(base_size = 12) +
     scale_x_continuous(
       expand = c(0,0),
       limits = c(0, 100),
