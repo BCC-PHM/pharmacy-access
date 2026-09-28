@@ -44,7 +44,7 @@ pharm_data <- get_pharmacy_data("Most recent") %>%
     postcode = post_code,
     name = organisation_name) %>%
   select(
-    postcode, name, contains("opening_hours"), contract_type
+    postcode, name, health_and_wellbeing_board, contains("opening_hours"), contract_type
   ) %>%
   mutate(
     popup_text = paste0(
@@ -56,7 +56,8 @@ pharm_data <- get_pharmacy_data("Most recent") %>%
       "<b>Friday</b>:", pharmacy_opening_hours_friday, "<br>",
       "<b>Saturday</b>:", pharmacy_opening_hours_saturday, "<br>",
       "<b>Sunday</b>:", pharmacy_opening_hours_sunday
-    )
+    ),
+    health_and_wellbeing_board = stringr::str_to_title(health_and_wellbeing_board)
   )%>%
   filter(
     # Filter out distance prescribing pharmacies
@@ -65,7 +66,6 @@ pharm_data <- get_pharmacy_data("Most recent") %>%
   )
 
 eth_data <- read_excel(GP_data_path)
-
 ```
 :::{.panel-tabset}
 
@@ -81,7 +81,7 @@ alldays_access <- basic_access_analysis(
   )
 
 ```
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham. An estimated `r alldays_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+There are currently `r alldays_access$open_count` pharmacies in Birmingham. An estimated `r alldays_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6
@@ -128,7 +128,7 @@ sat_lowest <- saturday_access$eth_access %>%
 
 ```
 
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r saturday_access$open_count` (`r round(100*saturday_access$open_count/nrow(pharm_data),1)`%) are open on Saturday. An estimated `r saturday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open on Saturdays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+There are currently `r alldays_access$open_count` pharmacies in Birmingham. Of these, `r saturday_access$open_count` (`r round(100*saturday_access$open_count/nrow(pharm_data),1)`%) are open on Saturday. An estimated `r saturday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open on Saturdays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6
@@ -175,7 +175,7 @@ sun_lowest <- sunday_access$eth_access %>%
 
 ```
 
-There are currently `r nrow(pharm_data)` pharmacies in Birmingham. Of these, `r sunday_access$open_count` (`r round(100*sunday_access$open_count/nrow(pharm_data),1)`%) are open on Sunday. An estimated `r sunday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open on Sundays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+There are currently `r alldays_access$open_count` pharmacies in Birmingham. Of these, `r sunday_access$open_count` (`r round(100*sunday_access$open_count/nrow(pharm_data),1)`%) are open on Sunday. An estimated `r sunday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open on Sundays. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6

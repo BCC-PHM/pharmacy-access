@@ -1,5 +1,4 @@
 library(httr)
-library(jsonlite)
 library(stringr)
 source("configs.R")
 
@@ -14,7 +13,7 @@ get_json <- function(url) {
     handle = h
   )
   
-  fromJSON(rawToChar(res$content))
+  jsonlite::fromJSON(rawToChar(res$content))
 }
 
 get_open_data_list <- function() {

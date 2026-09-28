@@ -114,8 +114,18 @@ get_total_access_perc <- function(
 
 get_open_pharm_count <- function(
     df,
-    day
+    day,
+    area = "All"
 ) {
+  if (area %in% unique(df$health_and_wellbeing_board)) {
+    df <- df %>%
+      filter(
+        health_and_wellbeing_board == area
+      )
+  } else if(area != "All") {
+    stop("Unrecognised area given to get_open_pharm_count()")
+  }
+
   nrow(day_filter(df, day = day))
 }
 
@@ -135,7 +145,11 @@ basic_access_analysis <- function(
   
   access_perc <- get_total_access_perc(pharm_access_sf)
   
-  open_count <- get_open_pharm_count(pharm_data, day = day)
+  open_count <- get_open_pharm_count(
+    pharm_data, 
+    day = day, 
+    area = "Birmingham"
+    )
   
   m <- plot_access_map(
     pharm_access_sf,
