@@ -1,1 +1,0 @@
-GP_data_path <- "Z:/2.0 KNOWLEDGE EVIDENCE & GOVERNANCE - KEG/2.12 PHM AND RESEARCH/Data/Primary Care/2026/GP-ethnicity-LSOA21.xlsx"

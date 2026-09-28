@@ -1,6 +1,21 @@
 library(httr)
 library(jsonlite)
 library(stringr)
+source("configs.R")
+
+get_json <- function(url) {
+  # Send API call to get list of data-sets
+  h <- curl::new_handle(
+    proxy = bcc_proxy_url
+  )
+  
+  res <- curl::curl_fetch_memory(
+    url,
+    handle = h
+  )
+  
+  fromJSON(rawToChar(res$content))
+}
 
 get_open_data_list <- function() {
   #Define the url for the API call
@@ -9,12 +24,12 @@ get_open_data_list <- function() {
   package_show_method <- "package_show?id=" # List all resources of a data-set
   action_method <- "datastore_search_sql?"  # SQL action method
   
-  # Send API call to get list of data-sets
-  datasets_response <- fromJSON(paste0(
-    base_endpoint, 
-    package_list_method
-  ))
-  
+  datasets_response <-get_json(
+    paste0(
+      base_endpoint, 
+      package_list_method
+    )
+  )
   # Now lets have a look at the data-sets currently available
   datasets_response$result
 }
@@ -30,7 +45,7 @@ get_pharmacy_data <- function(
     "&limit=15000"
     )
   
-  fromJSON(url)$result$records
+  get_json(url)$result$records
 }
 
 # Calculates string one year before one given
@@ -55,7 +70,7 @@ get_dataset_name <- function(
 ) {
   # add assert for periods
   
-  resources <- fromJSON(
+  resources <- get_json(
     "https://opendata.nhsbsa.net/api/3/action/package_show?id=consolidated-pharmaceutical-list"
   )$result$resources %>%
     mutate(period = str_extract(title, "(?<= - ).*"))

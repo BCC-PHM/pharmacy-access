@@ -10,13 +10,13 @@ day_filter <- function(
   if (day == "Saturday") {
     df <- df %>%
       filter(
-        df$birmingham_pharmacy_opening_hours_saturday != "CLOSED"
+        pharmacy_opening_hours_saturday != "CLOSED"
       )
   }
   else if (day == "Sunday") {
     df <- df %>%
       filter(
-        df$birmingham_pharmacy_opening_hours_sunday != "CLOSED"
+        pharmacy_opening_hours_sunday != "CLOSED"
       )
   } else if (day != "All Days") {
     stop("Unrecognised day filter.")

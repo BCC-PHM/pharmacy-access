@@ -60,7 +60,8 @@ pharm_data <- get_pharmacy_data("Most recent") %>%
   )%>%
   filter(
     # Filter out distance prescribing pharmacies
-    contract_type != "DAC"
+    contract_type != "DAC",
+    postcode %in% wm_postcodes$postcode
   )
 
 eth_data <- read_excel(GP_data_path)
