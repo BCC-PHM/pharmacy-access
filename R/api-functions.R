@@ -2,6 +2,15 @@ library(httr)
 library(stringr)
 source("configs.R")
 
+get_period_string <- function(dataset_name) {
+  base_string <- stringr::str_extract(dataset_name, "\\d{6}Q\\d")
+  year_start <- as.numeric(substr(base_string, 1, 4))
+  year <- paste0(year_start, "/", year_start-2000)
+  quarter <- substr(base_string, 7,8)
+  outstring <- paste(year, quarter)
+  return(outstring)
+}
+
 get_json <- function(url) {
   # Send API call to get list of data-sets
   h <- curl::new_handle(
@@ -44,7 +53,10 @@ get_pharmacy_data <- function(
     "&limit=15000"
     )
   
-  get_json(url)$result$records
+  get_json(url)$result$records %>%
+    mutate(
+      period = get_period_string(dataset_id)
+    )
 }
 
 # Calculates string one year before one given

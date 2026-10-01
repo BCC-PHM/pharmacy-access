@@ -70,7 +70,10 @@ plot_access_map <- function(
     day, ")")
   
   leaflet(pharm_access_sf) %>%
-    addTiles() %>%
+    addTiles(
+      urlTemplate = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+      attribution = "Tiles &copy; Esri"
+    ) %>%
     setView(lng = -1.876932, lat = 52.5, zoom = 11) %>%
     addPolygons(
       fillColor = ~ mypalette(pop_perc),

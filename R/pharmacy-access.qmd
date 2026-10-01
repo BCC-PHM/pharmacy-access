@@ -5,12 +5,10 @@ format:
   html:
     embed-resources: true
     css: styles.css
+    #bcc-html: default
 editor: source
 echo: false
 warning: false
-theme:
-  light: flatly
-  dark: darkly
 ---
 
 ```{r setup}
@@ -44,7 +42,7 @@ pharm_data <- get_pharmacy_data("Most recent") %>%
     postcode = post_code,
     name = organisation_name) %>%
   select(
-    postcode, name, health_and_wellbeing_board, contains("opening_hours"), contract_type
+    postcode, name, health_and_wellbeing_board, contains("opening_hours"), contract_type, period
   ) %>%
   mutate(
     popup_text = paste0(
@@ -65,7 +63,11 @@ pharm_data <- get_pharmacy_data("Most recent") %>%
     postcode %in% wm_postcodes$postcode
   )
 
+
+
 eth_data <- read_excel(GP_data_path)
+
+latest_date <- pharm_data$period[[1]]
 ```
 :::{.panel-tabset}
 
@@ -81,7 +83,7 @@ alldays_access <- basic_access_analysis(
   )
 
 ```
-There are currently `r alldays_access$open_count` pharmacies in Birmingham. An estimated `r alldays_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
+In `r latest_date` there were `r alldays_access$open_count` pharmacies in Birmingham. An estimated `r alldays_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included.
 
 ```{r}
 #| fig-width: 6
@@ -90,7 +92,7 @@ There are currently `r alldays_access$open_count` pharmacies in Birmingham. An e
 alldays_access$m
 ```
 
-An estimated `r round(alldays_access$var_dist$access_perc[1], 1)`% and `r round(alldays_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(alldays_access$var_dist$radii_miles[1], 1)` miles and `r round(alldays_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open at least one day of the week. 
+An estimated `r round(alldays_access$var_dist$access_perc[1], 1)`% and `r round(alldays_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(alldays_access$var_dist$radii_miles[1], 1)` miles and `r round(alldays_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open at least one day of the week.
 
 ```{r}
 #| fig-width: 6
@@ -122,7 +124,7 @@ saturday_access <- basic_access_analysis(
 
 sat_highest <- saturday_access$eth_access %>%
     slice_max(access_perc, n = 2, with_ties = FALSE)
-  
+
 sat_lowest <- saturday_access$eth_access %>%
     slice_min(access_perc, n = 2, with_ties = FALSE)
 
@@ -137,7 +139,7 @@ There are currently `r alldays_access$open_count` pharmacies in Birmingham. Of t
 saturday_access$m
 ```
 
-An estimated `r round(saturday_access$var_dist$access_perc[1], 1)`% and `r round(saturday_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(saturday_access$var_dist$radii_miles[1], 1)` miles and `r round(saturday_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open on Saturdays. 
+An estimated `r round(saturday_access$var_dist$access_perc[1], 1)`% and `r round(saturday_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(saturday_access$var_dist$radii_miles[1], 1)` miles and `r round(saturday_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open on Saturdays.
 
 ```{r}
 #| fig-width: 6
@@ -146,7 +148,7 @@ An estimated `r round(saturday_access$var_dist$access_perc[1], 1)`% and `r round
 ggplotly(saturday_access$var_dist_plot)
 ```
 
-Estimated pharmacy access on a Saturday shows limited variation across ethnicity. The ethnic groups with the estimated proportion living within 1 mile of a pharmacy open on a Saturday are `r sat_highest$ethnicity[1]` and `r sat_highest$ethnicity[2]` with `r sat_highest$access_perc[1]`% and `r sat_highest$access_perc[2]`% respectively. The groups with the lowest estimated access are `r sat_lowest$ethnicity[1]` and `r sat_lowest$ethnicity[2]` with `r sat_lowest$access_perc[1]`% and `r sat_lowest$access_perc[2]`% respectively. 
+Estimated pharmacy access on a Saturday shows limited variation across ethnicity. The ethnic groups with the estimated proportion living within 1 mile of a pharmacy open on a Saturday are `r sat_highest$ethnicity[1]` and `r sat_highest$ethnicity[2]` with `r sat_highest$access_perc[1]`% and `r sat_highest$access_perc[2]`% respectively. The groups with the lowest estimated access are `r sat_lowest$ethnicity[1]` and `r sat_lowest$ethnicity[2]` with `r sat_lowest$access_perc[1]`% and `r sat_lowest$access_perc[2]`% respectively.
 
 ```{r}
 #| fig-width: 6
@@ -169,7 +171,7 @@ sunday_access <- basic_access_analysis(
 
 sun_highest <- sunday_access$eth_access %>%
     slice_max(access_perc, n = 2, with_ties = FALSE)
-  
+
 sun_lowest <- sunday_access$eth_access %>%
     slice_min(access_perc, n = 2, with_ties = FALSE)
 
@@ -185,7 +187,7 @@ sunday_access$map
 ```
 
 
-An estimated `r round(sunday_access$var_dist$access_perc[1], 1)`% and `r round(sunday_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(sunday_access$var_dist$radii_miles[1], 1)` miles and `r round(sunday_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open on Sundays. 
+An estimated `r round(sunday_access$var_dist$access_perc[1], 1)`% and `r round(sunday_access$var_dist$access_perc[2], 1)`% of Birmingham residents live within `r round(sunday_access$var_dist$radii_miles[1], 1)` miles and `r round(sunday_access$var_dist$radii_miles[2], 1)` miles respectively of a pharmacy that is open on Sundays.
 
 ```{r}
 #| fig-width: 6
@@ -194,7 +196,7 @@ An estimated `r round(sunday_access$var_dist$access_perc[1], 1)`% and `r round(s
 ggplotly(sunday_access$var_dist_plot)
 ```
 
-Estimated pharmacy access on a Sunday shows moderate variation across ethnicity. The ethnic groups with the estimated proportion living within 1 mile of a pharmacy open on a Sunday are `r sun_highest$ethnicity[1]` and `r sun_highest$ethnicity[2]` with `r sun_highest$access_perc[1]`% and `r sun_highest$access_perc[2]`% respectively. The groups with the lowest estimated access are `r sun_lowest$ethnicity[1]` and `r sun_lowest$ethnicity[2]` with `r sun_lowest$access_perc[1]`% and `r sun_lowest$access_perc[2]`% respectively. 
+Estimated pharmacy access on a Sunday shows moderate variation across ethnicity. The ethnic groups with the estimated proportion living within 1 mile of a pharmacy open on a Sunday are `r sun_highest$ethnicity[1]` and `r sun_highest$ethnicity[2]` with `r sun_highest$access_perc[1]`% and `r sun_highest$access_perc[2]`% respectively. The groups with the lowest estimated access are `r sun_lowest$ethnicity[1]` and `r sun_lowest$ethnicity[2]` with `r sun_lowest$access_perc[1]`% and `r sun_lowest$access_perc[2]`% respectively.
 
 
 ```{r}
@@ -205,3 +207,53 @@ ggplotly(sunday_access$eth_plot)
 ```
 
 :::
+
+## Change Since Last Year
+
+```{r load-last-year}
+
+last_year_data <- get_pharmacy_data("Last year") %>%
+  clean_names() %>%
+  rename(
+    postcode = post_code,
+    name = organisation_name) %>%
+  select(
+    postcode, name, health_and_wellbeing_board, contains("opening_hours"), contract_type, period
+  ) %>%
+  mutate(
+    popup_text = paste0(
+      "<b>", name, "</b><br><br>",
+      "<b>Monday</b>:", pharmacy_opening_hours_monday, "<br>",
+      "<b>Tuesday</b>:", pharmacy_opening_hours_tuesday, "<br>",
+      "<b>Wednesday</b>:", pharmacy_opening_hours_wednesday, "<br>",
+      "<b>Thursday</b>:", pharmacy_opening_hours_thursday, "<br>",
+      "<b>Friday</b>:", pharmacy_opening_hours_friday, "<br>",
+      "<b>Saturday</b>:", pharmacy_opening_hours_saturday, "<br>",
+      "<b>Sunday</b>:", pharmacy_opening_hours_sunday
+    ),
+    health_and_wellbeing_board = stringr::str_to_title(health_and_wellbeing_board)
+  )%>%
+  filter(
+    # Filter out distance prescribing pharmacies
+    contract_type != "DAC",
+    postcode %in% wm_postcodes$postcode
+  )
+
+last_year_date <- last_year_data$period[[1]]
+
+lastyear_allday_access <- basic_access_analysis(
+    last_year_data,
+    radius_km = key_distance_km,
+    day = "All Days",
+    radii_km_list = radii_list,
+    eth_data = eth_data
+  )
+
+access_change <- alldays_access$var_dist$access_perc[[3]] - lastyear_allday_access$var_dist$access_perc[[3]]
+  
+increase_decrease <- ifelse(
+  access_change > 0, "increase", "decrease"
+)
+```
+
+In `r last_year_date` there were `r lastyear_allday_access$open_count` pharmacies in Birmingham. An estimated `r lastyear_allday_access$access_perc`% of Birmingham residents live within 1 mile (14 - 20 minutes walking distance) of a pharmacy that is open at least one day of the week. It should be noted that pharmacy access near the outer Birmingham border may be underestimated since pharmacies outside Birmingham are not included. Since last year, there has been a `r round(abs(access_change),2)`% `r increase_decrease` in proportion of residents living within one mile of a pharmacy.
